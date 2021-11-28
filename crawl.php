@@ -1,13 +1,13 @@
 <?php
-require '../../simple_html_dom.php';
-require_once '../../config/site-config.php'; 
-$sql = "SELECT id, site FROM sites";
+require './config.php';
+require "./simple_html_dom.php";
+$sql = "SELECT id, url FROM sites";
 $result = $link->query($sql);
 
 if ($result->num_rows > 0) {
   // output data of each row
     while($row = $result->fetch_assoc()) {
-        $data = $row["site"];
+        $data = $row["url"];
         $urlContent = file_get_contents($data);
         $dom = new DOMDocument();
         @$dom->loadHTML($urlContent);
@@ -18,7 +18,7 @@ if ($result->num_rows > 0) {
           $url = $href->getAttribute('href');
           $url = filter_var($url, FILTER_SANITIZE_URL);
           echo '<a href="'.$url.'">'.$url.'</a><br />';
-          $stmt = $link->prepare("INSERT INTO sites (site) VALUES (?)");
+          $stmt = $link->prepare("INSERT INTO sites (sites) VALUES (?)");
           $stmt->bind_param("s", $url);
           $reg_exUrl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
             if(preg_match($reg_exUrl, $url)){
@@ -31,6 +31,7 @@ if ($result->num_rows > 0) {
 }else{
   echo "nothing added";
 }
+  die;
 function getDescription($url) {
     $tags = get_meta_tags($url);
     return @($tags['description'] ? $tags['description'] : $url);
@@ -42,7 +43,7 @@ function getMeta($url) {
 $result = mysqli_query($link, "SELECT * FROM sites");
 $i=0;
 while($row = mysqli_fetch_array($result)) {
-$name = $row["site"];
+$name = $row["url"];
 echo $name;
 if (empty(file_get_html($name))) {   
         $sql = "DELETE FROM sites WHERE id=".$row["id"];
